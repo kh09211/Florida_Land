@@ -1,0 +1,11 @@
+{
+    "require": {
+        "fabpot/goutte": "^4.0",
+        "nesbot/carbon": "^2.45"
+    },
+    "autoload": {
+        "psr-4": {
+            "Land\\": "src/"
+        }
+    }
+}
