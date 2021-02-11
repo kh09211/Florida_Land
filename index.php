@@ -86,14 +86,14 @@ if (isset($_GET['run'])) {
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<!-- title -->
-	<title>Florida Craigslist Land Compiler 1.0</title>
+	<title>Florida Land Scraper 1.0</title>
 	<!-- bootsrtap 5 CDN -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 </head>
 
 <body class="bg-light">
 	<div class="container">
-		<h1 class="text-center mt-5 text-success">Florida Land Craglist Ads</h1>
+		<h1 class="text-center mt-5 text-success">Florida Land Ads Scraper</h1>
 		<h3 class="text-center text-success">past 24 hrs, newest first.</h3>
 		<h4 class="text-center mt-3"><?php echo $adsCount ?></h4>
 		<br>
