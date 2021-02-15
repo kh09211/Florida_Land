@@ -89,6 +89,15 @@ if (isset($_GET['run'])) {
 	<title>Florida Land Scraper 1.0</title>
 	<!-- bootsrtap 5 CDN -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+	<style>
+		body {
+			background-image: url('forest.jpg');
+			background-repeat: no-repeat;
+			background-attachment: fixed;
+			background-position: center top;
+			background-size: cover;
+		}
+	</style>
 </head>
 
 <body class="bg-light">
