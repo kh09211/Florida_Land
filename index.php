@@ -144,7 +144,9 @@ if (isset($_GET['run'])) {
 					<button class="d-block mx-auto btn btn-success" onclick="showLoading()">Run Search!</button>
 					<div class="text-center"></div>
 				</div>
-				<div id="loading" class="my-5 text-center h2"></div>
+				<div id="loading" class="my-5 text-center d-none">
+					<div class="spinner-border" role="status"></div><span class="h2">&nbsp Loading results...</span>
+				</div>
 			</form>
 		<?php } ?>
 	</div>
@@ -152,7 +154,8 @@ if (isset($_GET['run'])) {
 <script>
 	function showLoading() {
 		loadingDiv = document.getElementById('loading');
-		loadingDiv.innerHTML = "Loading results...";
+		loadingDiv.classList.remove("d-none");
+		loadingDiv.classList.add("d-block");
 	}
 </script>
 
