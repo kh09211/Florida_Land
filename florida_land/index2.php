@@ -3,78 +3,37 @@ require 'vendor/autoload.php';
 
 // the index file where we will show our craiglist results
 
-use Land\Craigslist;
+use Land\Zillow;
 use Carbon\Carbon;
+use App\SQLiteConnection;
+use App\SQLiteCreateZillowTable;
 
-$citiesArray = [
-	'daytona',
-	'keys',
-	'fortmyers',
-	'gainesville',
-	'cfl',
-	'jacksonville',
-	'lakeland',
-	'lakecity',
-	'ocala',
-	'okaloosa',
-	'orlando',
-	'panamacity',
-	'pensacola',
-	'sarasota',
-	'miami',
-	'spacecoast',
-	'staugustine',
-	'tallahassee',
-	'tampa',
-	'treasure'
-];
+$pdo = (new SQLiteConnection())->connect();
+if ($pdo == null) { 
+	echo 'Whoops, could not connect to the SQLite database!'; die;
+} else {
+	// create table if it doesn't exist already
+	//(new SQLiteCreateZillowTable($pdo))->dropTables();
+	(new SQLiteCreateZillowTable($pdo))->createTables();
+}
+
+$zillow = new Zillow($pdo);
+$countiesArray = $zillow->getCounties();
+
 $projectPath = '/';//"/PHP_Projects/florida_land/";
 
 if (isset($_GET['run'])) {
 
-	$craigslist = new Craigslist;
-	$allCities24hrs = [];
-
-
-	foreach ($citiesArray as $city) {
-		$random = rand(1, 10) / 5; // a random number between 0.2 and 2
-		sleep($random); // pause to avoid running too fast
-
-		// execute the scrape
-		$results = $craigslist->GetTodaysLand($city);
-
-		// merge it with the rest of the results
-		$allCities24hrs = array_merge($allCities24hrs, $results);
-	}
-
-	// use usort an callback to sort the array by timestamps
-	function cmp($a, $b)
-	{
-		$parsedA = Carbon::parse($a['time']);
-		$parsedB = Carbon::parse($b['time']);
-
-		return ($parsedA->lessThan($parsedB)) ? 1 : -1;
-	}
-
-	usort($allCities24hrs, 'cmp');
-
-
-	// filter duplicate ad postings out of the array, then filter out null values, then reset the index values
-	$allCities24hrs = array_filter($allCities24hrs, function ($item, $key) use ($allCities24hrs) {
-		if ($key > 0) {
-			return ($item['desc'] != $allCities24hrs[$key - 1]['desc']);
-		} else {
-			return true; // the first iteration
-		}
-	}, ARRAY_FILTER_USE_BOTH);
-
-	$allCities24hrs = array_values(array_filter($allCities24hrs));
-
-	$adsCount = "Found: " . strval(count($allCities24hrs));
+		// execute the scrape and store results
+		//$zillow->consumeLandData();
+		//$zillow->insertSold();
+		$results = $zillow->getSold(90);
+dump($results); die;
+	
 } else {
 	$adsCount = implode(' - ', array_map(function ($val) {
 		return ucfirst($val);
-	}, $citiesArray));
+	}, $countiesArray));
 }
 
 ?>
@@ -87,12 +46,12 @@ if (isset($_GET['run'])) {
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<!-- title -->
-	<title>Florida Land Scraper 1.0</title>
+	<title>Florida Land Zillow Stats 1.0</title>
 	<!-- bootsrtap 5 CDN -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 	<style>
 		body {
-			background-image: url('forest.jpg');
+			background-image: url('field2.jpg');
 			background-repeat: no-repeat;
 			background-attachment: fixed;
 			background-position: center top;
@@ -103,9 +62,9 @@ if (isset($_GET['run'])) {
 
 <body class="bg-light">
 	<div class="container">
-		<h1 class="text-center mt-5 text-success">Florida Land Ads Scraper</h1>
-		<h3 class="text-center text-success">past 24 hrs, newest first.</h3>
-		<h4 class="text-center mt-3"><?php echo $adsCount ?></h4>
+		<h1 class="text-center mt-5 text-success">Florida Land Zillow Stats</h1>
+		<h3 class="text-center text-success">Sold past 90 days.</h3>
+		<h4 class="text-center mt-3 text-success"><?php echo $adsCount ?></h4>
 		<br>
 
 		<?php if (isset($_GET['run'])) { ?>
@@ -123,7 +82,7 @@ if (isset($_GET['run'])) {
 					</thead>
 					<tbody>
 						<?php
-						foreach ($allCities24hrs as $index => $listing) {
+						foreach ($results as $index => $listing) {
 
 							echo '<tr>';
 							echo '<th scope="row">' . strval($index + 1) . '</th>';
@@ -139,7 +98,7 @@ if (isset($_GET['run'])) {
 				</table>
 			</div>
 		<?php } else { ?>
-			<form action="<?php echo $projectPath; ?>index.php" method="GET">
+			<form action="<?php echo $projectPath; ?>index2.php" method="GET">
 				<input type="hidden" name="run" value="true" />
 				<div class="w-100">
 					<button class="d-block mx-auto btn btn-success" onclick="showLoading()">Run Search!</button>

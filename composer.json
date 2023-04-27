@@ -5,7 +5,11 @@
     },
     "autoload": {
         "psr-4": {
-            "Land\\": "src/"
+            "Land\\": "src/land/",
+            "App\\": "src/app/"
         }
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^6.2"
     }
 }
