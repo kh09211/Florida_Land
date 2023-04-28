@@ -12,7 +12,7 @@ class ZillowCountyData {
 		'Baker' => [
 			'mapState' => '{"north":30.756766704392238,"east":-81.13781890429686,"south":29.962847867977192,"west":-83.37079009570311}',
 			'regionSelection' => '[{"regionId":378,"regionType":4}]'
-		]/*,
+		],
 		'Bay' => [
 			'mapState' => '{"north":30.631587629547713,"east":-84.57533240429687,"south":29.836650539816805,"west":-86.80830359570312}',
 			'regionSelection' => '[{"regionId":67,"regionType":4}]'
@@ -262,12 +262,12 @@ class ZillowCountyData {
 			'regionSelection' => '[{"regionId":2066,"regionType":4}]'
 		],
 		'Walton' => [
-			'mapState' => '{"north":30.329671112479446,"east":-83.84838620214845,"south":29.931781171866632,"west":-84.96487179785157}',
-			'regionSelection' => '[{"regionId":1468}]'
+			'mapState' => '{"north":31.037427002869457,"east":-84.51421201171877,"south":30.169849494433326,"west":-87.72771298828127}',
+			'regionSelection' => '[{"regionId":1468,"regionType":4}]'
 		],
 		'Washington' => [
 			'mapState' => '{"north":31.005320707017074,"east":-84.59648940429688,"south":30.213435067527477,"west":-86.82946059570313}',
 			'regionSelection' => '[{"regionId":3050,"regionType":4}]'
-        ]*/
+        ]
 	];
 }

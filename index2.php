@@ -25,10 +25,15 @@ $projectPath = '/';//"/PHP_Projects/florida_land/";
 if (isset($_GET['run'])) {
 
 		// execute the scrape and store results
-		//$zillow->consumeLandData();
+		//$zillow->consumeLandDataSold();
 		//$zillow->insertSold();
-		$results = $zillow->getSold(90);
-dump($results); die;
+		//$zillow->consumeLandDataForSale();
+		//$zillow->insertForSale();
+		//dump('Done!'); die;
+		//dump($zillow->getTotalsForSale());
+		dump($zillow->getSoldByCounty());
+		dump($zillow->getForSaleByCounty()); die;
+//dump($zillow->getResults()); die;
 	
 } else {
 	$adsCount = implode(' - ', array_map(function ($val) {
