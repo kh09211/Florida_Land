@@ -79,7 +79,27 @@ class Craigslist {
 		$data = $response['data'];
 		$resultCount = $data['totalResultCount'];
 		$items = array_slice($data['items'], 0, $resultCount);
-		dump($items); die;
+
+		$results = [];
+		foreach ($items as $item) {
+			foreach (array_reverse($item) as $value) {
+				if (gettype($value) == 'string') {
+					$desc = $value;
+					break;
+				}
+			}
+			$slug = (gettype($item[6]) == 'array' && count($item[6]) == 2) ? $item[6][1] : $item[5][1];
+			$priceFormatter = new \NumberFormatter('en_US', \NumberFormatter::CURRENCY);
+			$price = $priceFormatter->formatCurrency($item[3], 'USD');
+			$results[] = [
+				'city' => ucfirst($city),
+				'link' => "https://{$city}.craigslist.org/reo/d/{$slug}/{$data['decode']['minPostingId']}.html",
+				'desc' => $desc,
+				'price' => ($item[3] !== -1) ? substr($price, 0, -3) : 'Unavailable'
+			];
+		}
+
+		return $results;
 	}
 
 }
