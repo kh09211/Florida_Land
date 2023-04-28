@@ -58,12 +58,12 @@ class ZillowCountyData {
 			'regionSelection' => '[{"regionId":480,"regionType":4}]'
 		],
 		'Duval' => [
-			'mapState' => '{"north":29.938083542018983,"east":-82.07612440429686,"south":29.137574942858993,"west":-84.30909559570311}',
-			'regionSelection' => '[{"regionId":480,"regionType":4}]'
+			'mapState' => '{"north":30.7792664633362,"east":-80.07635651171876,"south":29.90937527963851,"west":-83.28985748828126}',
+			'regionSelection' => '[{"regionId":489,"regionType":4}]'
 		],
 		'Escambia' => [
-			'mapState' => '{"north":29.938083542018983,"east":-82.07612440429686,"south":29.137574942858993,"west":-84.30909559570311}',
-			'regionSelection' => '[{"regionId":480,"regionType":4}]'
+			'mapState' => '{"north":31.047810544021125,"east":-85.66900101171875,"south":30.180326468274618,"west":-88.88250198828125}',
+			'regionSelection' => '[{"regionId":2259,"regionType":4}]'
 		],
 		'Flagler' => [
 			'mapState' => '{"north":29.866066341072166,"east":-80.16630590429689,"south":29.064985955045653,"west":-82.39927709570314}',
