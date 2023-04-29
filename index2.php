@@ -27,101 +27,109 @@ if (isset($_GET['run'])) {
 		// execute the scrape and store results
 		//$zillow->consumeLandDataSold();
 		//$zillow->insertSold();
-		//$zillow->consumeLandDataForSale();
-		//$zillow->insertForSale();
-		//dump('Done!'); die;
+		$zillow->consumeLandDataForSale();
+		$zillow->insertForSale();
+		dump('Done!'); die;
 		//dump($zillow->getTotalsForSale());
 		dump($zillow->getSoldByCounty());
 		dump($zillow->getForSaleByCounty()); die;
 //dump($zillow->getResults()); die;
 	
 } else {
+	// Variables to pass to the view
 	$adsCount = implode(' - ', array_map(function ($val) {
 		return ucfirst($val);
 	}, $countiesArray));
+
+	$soldTotals = $zillow->getTotalsSold();
+	$forSaleTotals = $zillow->getTotalsForSale();
+	$forSaleListings = $zillow->getForSaleByCounty();
+	$soldListings = $zillow->getSoldByCounty();
+	$totalListingsInDB = array_reduce([...$forSaleListings, ...$soldListings],fn($a, $v) => $a + count($v), 0);
+	
+	$soldTotalsJSON = json_encode($soldTotals);
+	$forSaleTotalsJSON = json_encode($forSaleTotals);
+	$soldListingsJSON = json_encode($soldListings);
+	$forSaleListingsJSON = json_encode($forSaleListings);
+
+	$dateTo = (new \DateTime)->setTimestamp($soldTotals[0]['insert_timestamp'])->format('m/d/Y');
+	$dateFrom = (new \DateTime)->setTimestamp($soldTotals[0]['insert_timestamp'] - 7776000)->format('m/d/Y');
+	//var_dump($soldTotals[0]); die;
+	echo "<script>
+			const soldTotals = {$soldTotalsJSON};
+			const forSaleTotals = {$forSaleTotalsJSON};
+			const soldListings = {$soldListingsJSON};
+			const forSaleListings = {$forSaleListingsJSON};
+		 </script>";
 }
 
 ?>
 
 <!DOCTYPE html>
 <html>
+	<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<!-- title -->
+		<title>Florida Land Zillow Stats 1.0</title>
+		<!-- bootsrtap 5 CDN -->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+		<style>
+			body {
+				background-image: url('field2.jpg');
+				background-repeat: no-repeat;
+				background-attachment: fixed;
+				background-position: center top;
+				background-size: cover;
+			}
+			.chart-bg {
+				background-color: white;
+				opacity: .8;
+				border-radius: 5px;
+				padding: 8 10 3 10;
+			}
+		</style>
+	</head>
 
-<head>
-	<!-- Required meta tags -->
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<!-- title -->
-	<title>Florida Land Zillow Stats 1.0</title>
-	<!-- bootsrtap 5 CDN -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
-	<style>
-		body {
-			background-image: url('field2.jpg');
-			background-repeat: no-repeat;
-			background-attachment: fixed;
-			background-position: center top;
-			background-size: cover;
-		}
-	</style>
-</head>
+	<body class="bg-light pb-5">
+		<div class="container">
+			<h1 class="text-center mt-5 text-success">Florida Land Sales Stats</h1>
+			<h3 class="text-center text-success">With publically available data from Zillow.com</h3>
+			<h4 class="text-center text-success"><?php echo "{$dateFrom} - {$dateTo}" ?></h4>
+			<!-- <h6 class="text-center mt-4 text-success"><?php echo $adsCount ?></h6> -->
+			<div class="mt-4 pt-2">
+				<div class="row pb-4">
+					<div class="col-12 col-lg-6">
+						<canvas class="chart-bg" id="mostForSaleChart"></canvas>
+					</div>
+					<div class="col-12 col-lg-6">
+						<canvas class="chart-bg" id="lowestDaysOnZillowChart"></canvas>
+						<canvas class="chart-bg" id="highestDaysOnZillowChart"></canvas>
+					</div>
+				</div>
+				<div class="row pb-4">
+					<div class="col-12">
+						<canvas class="chart-bg" style="height: 2400px;" id="allForSaleChart"></canvas>
+					</div>
+				</div>
+				<!--
+				
 
-<body class="bg-light">
-	<div class="container">
-		<h1 class="text-center mt-5 text-success">Florida Land Zillow Stats</h1>
-		<h3 class="text-center text-success">Sold past 90 days.</h3>
-		<h4 class="text-center mt-3 text-success"><?php echo $adsCount ?></h4>
-		<br>
-
-		<?php if (isset($_GET['run'])) { ?>
-			<div class="border border-success rounded">
-				<table class="table table-success table-striped">
-					<thead>
-						<tr>
-							<th scope="col">#</th>
-							<th scope="col">Time</th>
-							<th scope="col">City</th>
-							<th scope="col">Description</th>
-							<th scope="price">Price</th>
-							<th scope="col">Link</th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php
-						foreach ($results as $index => $listing) {
-
-							echo '<tr>';
-							echo '<th scope="row">' . strval($index + 1) . '</th>';
-							echo '<td>' . $listing['time'] . '</td>';
-							echo '<td>' . $listing['city'] . '</td>';
-							echo '<td>' . $listing['desc'] . '</td>';
-							echo '<td>' . $listing['price'] . '</td>';
-							echo '<td><a href="' . $listing['link'] . '" target="_blank">Ad Link</a></td>';
-							echo '</tr>';
-						}
-						?>
-					</tbody>
-				</table>
+				<div class="row pb-4">
+					<div class="col-12">
+						<canvas class="chart-bg" id="avgTimeOnMarketChart"></canvas>
+					</div>
+				</div>
+				-->
 			</div>
-		<?php } else { ?>
-			<form action="<?php echo $projectPath; ?>index2.php" method="GET">
-				<input type="hidden" name="run" value="true" />
-				<div class="w-100">
-					<button class="d-block mx-auto btn btn-success" onclick="showLoading()">Run Search!</button>
-					<div class="text-center"></div>
-				</div>
-				<div id="loading" class="my-5 text-center d-none">
-					<div class="spinner-border" role="status"></div><span class="h2">&nbsp Loading results...</span>
-				</div>
-			</form>
-		<?php } ?>
-	</div>
-</body>
-<script>
-	function showLoading() {
-		loadingDiv = document.getElementById('loading');
-		loadingDiv.classList.remove("d-none");
-		loadingDiv.classList.add("d-block");
-	}
-</script>
+		</div>
 
+		<!-- load the charts.js CDN -->
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+		<!-- load our zillow chart code -->
+		<script src="zillowCharts.js"></script>
+	</body>
+	
 </html>

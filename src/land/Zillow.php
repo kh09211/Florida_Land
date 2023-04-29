@@ -67,6 +67,7 @@ class Zillow {
      * insert sold results into the database
      */
 	public function insertSold() {
+		$this->pdo->prepare("DELETE FROM zillow_sold")->execute();
 		foreach ($this->results as $county => $countyResults) {
 			// get out list of zpids to check agains
 			$stmt = $this->pdo->query("SELECT zpid FROM zillow_sold");
@@ -78,6 +79,7 @@ class Zillow {
 			}
 		}
 		// insert the total counts from zillow
+		$this->pdo->prepare("DELETE FROM zillow_sold_totals")->execute();
 		foreach ($this->results as $county => $countyResults) {
 			$sql = "INSERT INTO zillow_sold_totals (insert_timestamp, county, total) VALUES (?,?,?)";
 			$this->pdo->prepare($sql)->execute([time(), $county, $countyResults['total']]);
@@ -155,7 +157,7 @@ class Zillow {
 				//if ((int)$hdpData['daysOnZillow'] !== -1) { dump($result); die; } // possibly useful for homes, few results for land
 				if (!empty($result['timeOnZillow']) && !empty($hdpData['price']) && !empty($hdpData['lotAreaValue'])) {
 					$this->results[$county]['results'][$result['zpid']] = [
-						'daysOnZillow' => (time() - (int)substr($result['timeOnZillow'], 0, 10)) / 86400,
+						'daysOnZillow' => round((int)substr($result['timeOnZillow'], 0, 6) / 86400),
 						'price' => (int)$hdpData['price'],
 						'acres' => ($hdpData['lotAreaUnit'] == 'acres') ? (float)$hdpData['lotAreaValue'] : (float)$hdpData['lotAreaValue']/43560 // conv to acres
 					];
@@ -183,6 +185,7 @@ class Zillow {
 			}
 		}
 		// insert the total counts from zillow
+		$this->pdo->prepare("DELETE FROM zillow_forsale_totals")->execute();
 		foreach ($this->results as $county => $countyResults) {
 			$sql = "INSERT INTO zillow_forsale_totals (insert_timestamp, county, total) VALUES (?,?,?)";
 			$this->pdo->prepare($sql)->execute([time(), $county, $countyResults['total']]);
