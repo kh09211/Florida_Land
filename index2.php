@@ -30,21 +30,17 @@ if (isset($_GET['daterange'])) {
 	$dateFrom = (new \DateTime)->setTimestamp($soldTotals[0]['insert_timestamp'] - 7776000)->format('m/d/Y');
 }
 
-//$soldTotals = $zillow->getTotalsSold();
-//$forSaleTotals = $zillow->getTotalsForSale();
 $forSaleListings = $zillow->getForSaleByCounty();
 $soldListings = $zillow->getSoldByCounty();
 $totalListingsInDB = array_reduce([...$forSaleListings, ...$soldListings],fn($a, $v) => $a + count($v), 0);
 
-//soldTotalsJSON = json_encode($soldTotals);
-//$forSaleTotalsJSON = json_encode($forSaleTotals);
 $soldListingsJSON = json_encode($soldListings);
 $forSaleListingsJSON = json_encode($forSaleListings);
 
 echo "<script>
 		const soldListings = {$soldListingsJSON};
 		const forSaleListings = {$forSaleListingsJSON};
-		</script>";
+	</script>";
 ?>
 
 <!DOCTYPE html>
@@ -82,8 +78,8 @@ echo "<script>
 			<!-- <h6 class="text-center mt-4 text-success"><?php echo $adsCount ?></h6> -->
 			<div class="mt-4 pt-2">
 				<div class="row pb-4">
-					<div class="col-12 col-lg-6">
-						<canvas class="chart-bg" id="mostForSaleChart"></canvas>
+					<div class="col-12 col-lg-6 mb-4 mb-lg-0">
+						<canvas class="chart-bg" id="mostSoldChart"></canvas>
 					</div>
 					<div class="col-12 col-lg-6">
 						<canvas class="chart-bg" id="lowestDaysOnZillowChart"></canvas>
@@ -96,7 +92,7 @@ echo "<script>
 					</div>
 				</div>
 				<div class="row pb-4">
-					<div class="col-12 col-lg-6">
+					<div class="col-12 col-lg-6 mb-4 mb-lg-0">
 						<canvas class="chart-bg" id="highestCostPerAcreChart"></canvas>
 					</div>
 					<div class="col-12 col-lg-6">
@@ -104,7 +100,7 @@ echo "<script>
 					</div>
 				</div>
 				<div class="row pb-4">
-					<div class="col-12 col-lg-6">
+					<div class="col-12 col-lg-6 mb-4 mb-lg-0">
 						<canvas class="chart-bg" id="highestMedSalePriceChart"></canvas>
 					</div>
 					<div class="col-12 col-lg-6">

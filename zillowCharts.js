@@ -76,10 +76,10 @@ new Chart(allForSaleChart, {
 /**
  *  Chart (Pie) for counties with most sold land
  */
-const mostForSaleChart = document.getElementById('mostForSaleChart');
+const mostSoldChart = document.getElementById('mostSoldChart');
 let mostForSalePie = orderedSold.slice(0, 6);
-mostForSalePie.push({county: 'All other counties', total: orderedForSale.slice(6).reduce((accumulator, currentValue) => accumulator + currentValue.total, 0)})
-new Chart(mostForSaleChart, {
+mostForSalePie.push({county: 'All other counties', total: orderedSold.slice(6).reduce((accumulator, currentValue) => accumulator + currentValue.total, 0)})
+new Chart(mostSoldChart, {
     type: 'pie',
     data: {
         labels: mostForSalePie.map(row => row.county),
@@ -97,7 +97,7 @@ new Chart(mostForSaleChart, {
             },
             title: {
                 display: true,
-                text: 'Lots For Sale (90 days) Top Counties',
+                text: 'Lots Sold (90 days) Top Counties',
                 font: {
                     size: 25
                 }
@@ -113,7 +113,7 @@ const lowestDaysOnZillowChart = document.getElementById('lowestDaysOnZillowChart
 let avgDaysOnZillow = [];
 Object.values(forSaleListings).forEach(listings => {
     listings = listings.filter(data => data.days_on_zillow !== -1)
-    if (listings.length >= 10) {
+    if (listings.length >= 3) {
         let averageDays = listings.reduce((a, c) => a + c.days_on_zillow, 0) / listings.length;
         avgDaysOnZillow.push({county: listings[0].county, days: averageDays});
     }

@@ -18,8 +18,8 @@ if ($pdo == null) {
 $zillow = new Zillow($pdo);
 
 // execute the scrape and store results
-$zillow->consumeLandDataSold();
-$zillow->insertSold();
-$zillow->consumeLandDataForSale();
-$zillow->insertForSale();
+$zillow->consumeLandData('sold');
+$zillow->insertListings('sold');
+$zillow->consumeLandData('forsale');
+$zillow->insertListings('forsale');
 exit();

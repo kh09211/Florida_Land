@@ -66,9 +66,7 @@ class SQLiteCreateZillowTable {
     public function dropTables() {
         $commands = [
             'DROP TABLE IF EXISTS zillow_sold',
-            'DROP TABLE IF EXISTS zillow_sold_totals',
             'DROP TABLE IF EXISTS zillow_forsale',
-            'DROP TABLE IF EXISTS zillow_forsale_totals'
             ];
         // execute the sql commands to create new tables
         foreach ($commands as $command) {
