@@ -33,36 +33,27 @@ class SQLiteCreateZillowTable {
                 price INTEGER NOT NULL,
                 acres REAL NOT NULL,
                 county TEXT NOT NULL)',
-                
             'CREATE UNIQUE INDEX IF NOT EXISTS idx_zpid 
                 ON zillow_sold (zpid)',
-
             'CREATE INDEX IF NOT EXISTS idx_datesold 
             ON zillow_sold (date_sold)',
+            'CREATE INDEX IF NOT EXISTS idx_timestamp 
+            ON zillow_sold (insert_timestamp)',
 
-            'CREATE TABLE IF NOT EXISTS zillow_sold_totals (
-                id INTEGER PRIMARY KEY,
-                insert_timestamp INTEGER NOT NULL,
-                county TEXT NOT NULL,
-                total INTEGER NOT NULL)',
 
             'CREATE TABLE IF NOT EXISTS zillow_forsale (
                 id INTEGER PRIMARY KEY,
                 insert_timestamp INTEGER NOT NULL,
                 zpid  INTEGER NOT NULL,
-                days_on_zillow INTEGER NOT NULL,
+                days_on_zillow INTEGER,
                 price INTEGER NOT NULL,
                 acres REAL NOT NULL,
                 county TEXT NOT NULL)',
-
             'CREATE UNIQUE INDEX IF NOT EXISTS idx_zpid 
                 ON zillow_forsale (zpid)',
-
-            'CREATE TABLE IF NOT EXISTS zillow_forsale_totals (
-                id INTEGER PRIMARY KEY,
-                insert_timestamp INTEGER NOT NULL,
-                county TEXT NOT NULL,
-                total INTEGER NOT NULL)'];
+            'CREATE INDEX IF NOT EXISTS idx_timestamp 
+            ON zillow_forsale (insert_timestamp)'
+        ];
         // execute the sql commands to create new tables
         foreach ($commands as $command) {
             $this->pdo->exec($command);

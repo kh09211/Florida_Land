@@ -25,6 +25,13 @@ class Zillow {
 		return array_keys($this->countyData);
 	}
 
+	public function getDatesAvailable() {
+		$stmt = $this->pdo->query("SELECT DISTINCT(DATE(insert_timestamp, 'unixepoch')) FROM zillow_sold_totals");
+		$datesAvailable = $stmt->fetchall(\PDO::FETCH_COLUMN) ?: [];
+
+		return $datesAvailable;
+	}
+
 	/****************** SOLD METHODS ******************/
 
 	/**
@@ -67,7 +74,7 @@ class Zillow {
      * insert sold results into the database
      */
 	public function insertSold() {
-		$this->pdo->prepare("DELETE FROM zillow_sold")->execute();
+		//$this->pdo->prepare("DELETE FROM zillow_sold")->execute();
 		foreach ($this->results as $county => $countyResults) {
 			// get out list of zpids to check agains
 			$stmt = $this->pdo->query("SELECT zpid FROM zillow_sold");
@@ -79,11 +86,12 @@ class Zillow {
 			}
 		}
 		// insert the total counts from zillow
-		$this->pdo->prepare("DELETE FROM zillow_sold_totals")->execute();
+		//$this->pdo->prepare("DELETE FROM zillow_sold_totals")->execute();
+		/*
 		foreach ($this->results as $county => $countyResults) {
 			$sql = "INSERT INTO zillow_sold_totals (insert_timestamp, county, total) VALUES (?,?,?)";
 			$this->pdo->prepare($sql)->execute([time(), $county, $countyResults['total']]);
-		}
+		}*/
 	}
 
 	/**
@@ -118,6 +126,7 @@ class Zillow {
 	/**
      * get the sold county totals from the database
      */
+	 /*
     public function getTotalsSold(int $days = 30) {
 		$startUnix = time() - ($days * 86400);
 		$endUnix = time();
@@ -127,7 +136,7 @@ class Zillow {
                                    ORDER BY insert_timestamp");
 		return $stmt->fetchall(\PDO::FETCH_ASSOC) ?? [];
     }
-
+*/
 
 	/****************** FOR SALE METHODS ******************/
 
@@ -149,22 +158,22 @@ class Zillow {
 			$response = $browser->getResponse();
 			$response = $response->toArray();
 			$resData = $response['cat1'];
-			$results = [...$resData['searchResults']['mapResults']/*, ...$resData['searchResults']['listResults']*/];
+			$results = [...$resData['searchResults']['mapResults'], ...$resData['searchResults']['listResults']];
 			// process land results
 			foreach ($results as $result) {
 				if (!array_key_exists('hdpData', $result) || !array_key_exists('homeInfo', $result['hdpData'])) continue;
 				$hdpData = $result['hdpData']['homeInfo'];
 				//if ((int)$hdpData['daysOnZillow'] !== -1) { dump($result); die; } // possibly useful for homes, few results for land
-				if (!empty($result['timeOnZillow']) && !empty($hdpData['price']) && !empty($hdpData['lotAreaValue'])) {
+				if (!empty($hdpData['price']) && !empty($hdpData['lotAreaValue'])) {
 					$this->results[$county]['results'][$result['zpid']] = [
-						'daysOnZillow' => round((int)substr($result['timeOnZillow'], 0, 6) / 86400),
+						'daysOnZillow' => !empty($result['timeOnZillow']) ? round((int)substr($result['timeOnZillow'], 0, 6) / 86400) : -1, // -1 means no data
 						'price' => (int)$hdpData['price'],
 						'acres' => ($hdpData['lotAreaUnit'] == 'acres') ? (float)$hdpData['lotAreaValue'] : (float)$hdpData['lotAreaValue']/43560 // conv to acres
 					];
 				}
 			}
 			// process land totals
-			$this->results[$county]['total'] = $resData['searchList']['totalResultCount'];
+			//$this->results[$county]['total'] = $resData['searchList']['totalResultCount'];
 		}
 	}
 
@@ -173,7 +182,7 @@ class Zillow {
      */
 	public function insertForSale() {
 		// clear the database to make way for the latest data
-		$this->pdo->prepare("DELETE FROM zillow_forsale")->execute();
+		//$this->pdo->prepare("DELETE FROM zillow_forsale")->execute();
 		foreach ($this->results as $county => $countyResults) {
 			// get out list of zpids to check agains
 			$stmt = $this->pdo->query("SELECT zpid FROM zillow_forsale");
@@ -185,11 +194,13 @@ class Zillow {
 			}
 		}
 		// insert the total counts from zillow
-		$this->pdo->prepare("DELETE FROM zillow_forsale_totals")->execute();
+		//$this->pdo->prepare("DELETE FROM zillow_forsale_totals")->execute();
+		/*
 		foreach ($this->results as $county => $countyResults) {
 			$sql = "INSERT INTO zillow_forsale_totals (insert_timestamp, county, total) VALUES (?,?,?)";
 			$this->pdo->prepare($sql)->execute([time(), $county, $countyResults['total']]);
 		}
+		*/
 	}
 
 	/**

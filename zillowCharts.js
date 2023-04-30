@@ -2,21 +2,30 @@
  *  Charts for use with the Zillow stats for Florida land project
  */
 
-let orderedSold = soldTotals.slice();
-orderedSold.sort((a,b) => a.total <= b.total ? 1 : -1);
+// variables for use in some charts
 
-let orderedForSale = forSaleTotals.slice();
-orderedForSale.sort((a,b) => a.total <= b.total ? 1 : -1);
+let counties = Object.keys(soldListings);
 
+// ordered by county
+let orderedSold = counties.map(county => ({'county': county, 'total': soldListings[county].length}))
+let orderedForSale = counties.map(county => ({'county': county, 'total': forSaleListings[county].length}))
+
+// get a group of totals for out big all counties chart
 let groupedTotalsByCounty = {};
-soldTotals.forEach(data => {
-    console.log(data.county)
+orderedSold.forEach(data => {
     groupedTotalsByCounty[data.county] = {sold: data};
 });
-forSaleTotals.forEach(data => {
+orderedForSale.forEach(data => {
     groupedTotalsByCounty[data.county].forSale = data;
 });
 
+// now order by greatest total to lowest
+orderedSold.sort((a,b) => a.total <= b.total ? 1 : -1);
+orderedForSale.sort((a,b) => a.total <= b.total ? 1 : -1);
+
+/**
+ *  Chart for all land for sale / sold in Florida
+ */
 const allForSaleChart = document.getElementById('allForSaleChart');
 new Chart(allForSaleChart, {
     type: 'bar',
@@ -24,20 +33,19 @@ new Chart(allForSaleChart, {
         labels: Object.keys(groupedTotalsByCounty),
         datasets: [
         {
-            label: '# of Lots Sold',
-            data: Object.values(groupedTotalsByCounty).map(data => data.sold.total),
-            borderWidth: 1,
-            barThickness: 15,
-            backgroundColor: "dodgerblue"
-        },
-        {
             label: '# of Lots For Sale',
             data: Object.values(groupedTotalsByCounty).map(data => data.forSale.total),
             borderWidth: 1,
             barThickness: 15,
             backgroundColor: "gold",
-        }
-        ]
+        },
+        {
+            label: '# of Lots Sold',
+            data: Object.values(groupedTotalsByCounty).map(data => data.sold.total),
+            borderWidth: 1,
+            barThickness: 15,
+            backgroundColor: "dodgerblue"
+        }]
     },
     options: {
         indexAxis: 'y',
@@ -48,10 +56,10 @@ new Chart(allForSaleChart, {
                 ticks: {
                     autoSkip: false,
                 }
-            },
+            }/*,
             x: {
                 max: 2000
-            }
+            }*/
         },
         plugins: {
             title: {
@@ -65,9 +73,11 @@ new Chart(allForSaleChart, {
     }
 });
 
-//console.log(orderedForSale.reduce((accumulator, currentValue) => accumulator + currentValue.total, 0));
+/**
+ *  Chart (Pie) for counties with most sold land
+ */
 const mostForSaleChart = document.getElementById('mostForSaleChart');
-let mostForSalePie = orderedForSale.slice(0, 6);
+let mostForSalePie = orderedSold.slice(0, 6);
 mostForSalePie.push({county: 'All other counties', total: orderedForSale.slice(6).reduce((accumulator, currentValue) => accumulator + currentValue.total, 0)})
 new Chart(mostForSaleChart, {
     type: 'pie',
@@ -96,9 +106,13 @@ new Chart(mostForSaleChart, {
     }
 });
 
+/**
+ *  Chart for counties lowest number of average days on zillow 
+ */
 const lowestDaysOnZillowChart = document.getElementById('lowestDaysOnZillowChart');
 let avgDaysOnZillow = [];
 Object.values(forSaleListings).forEach(listings => {
+    listings = listings.filter(data => data.days_on_zillow !== -1)
     if (listings.length >= 10) {
         let averageDays = listings.reduce((a, c) => a + c.days_on_zillow, 0) / listings.length;
         avgDaysOnZillow.push({county: listings[0].county, days: averageDays});
@@ -134,6 +148,9 @@ new Chart(lowestDaysOnZillowChart, {
     }
 });
 
+/**
+ *  Chart for counties hightst number of average days on zillow 
+ */
 const highestDaysOnZillowChart = document.getElementById('highestDaysOnZillowChart');
 let avgDaysOnZillowMost15 = avgDaysOnZillow.slice(-15).reverse();
 new Chart(highestDaysOnZillowChart, {
@@ -164,15 +181,26 @@ new Chart(highestDaysOnZillowChart, {
     }
 });
 
-
-const leastSoldChart = document.getElementById('leastSoldChart');
-new Chart(leastSoldChart, {
+/**
+ *  Chart for highest avg cost per acre
+ */
+let avgCostPerAcre = [];
+Object.values(soldListings).forEach(listings => {
+    if (listings.length >= 0) {
+        let averageCost = listings.reduce((a, c) => a + (c.price / c.acres), 0) / listings.length;
+        avgCostPerAcre.push({county: listings[0].county, costPerAcre: averageCost, listings: listings.length});
+    }
+})
+avgCostPerAcre.sort((a, b) => a.costPerAcre <= b.costPerAcre ? 1 : -1)
+let avgCostPerAcre15 = avgCostPerAcre.slice(0, 15);
+const highestCostPerAcreChart = document.getElementById('highestCostPerAcreChart');
+new Chart(highestCostPerAcreChart, {
     type: 'bar',
     data: {
-        labels: orderedSold.map(row => row.county).slice(-15),
+        labels: avgCostPerAcre15.map(row => row.county),
         datasets: [{
-            label: '# of Lots',
-            data: orderedSold.map(row => row.total).slice(-15),
+            label: '$ per acre',
+            data: avgCostPerAcre15.map(row => row.costPerAcre),
             borderWidth: 1
         }]
     },
@@ -185,7 +213,7 @@ new Chart(leastSoldChart, {
         plugins: {
             title: {
                 display: true,
-                text: 'Sold (90 days) Lowest 15 counties',
+                text: 'Highest Avg Cost per Acre (Sold withing 90 days)',
                 font: {
                     size: 25
                 }
@@ -194,15 +222,18 @@ new Chart(leastSoldChart, {
     }
 });
 
-/*
-const avgTimeOnMarketChart = document.getElementById('avgTimeOnMarketChart');
-new Chart(avgTimeOnMarketChart, {
+/**
+ *  Chart for lowest avg cost per acre
+ */
+avgCostPerAcre15 = avgCostPerAcre.reverse().slice(0, 15);
+const lowestCostPerAcreChart = document.getElementById('lowestCostPerAcreChart');
+new Chart(lowestCostPerAcreChart, {
     type: 'bar',
     data: {
-        labels: orderedSold.map(row => row.county).slice(-15),
+        labels: avgCostPerAcre15.map(row => row.county),
         datasets: [{
-            label: 'Average time on market (Listings withing 90 days)',
-            data: orderedSold.map(row => row.total).slice(-15),
+            label: '$ Per acre',
+            data: avgCostPerAcre15.map(row => row.costPerAcre),
             borderWidth: 1
         }]
     },
@@ -215,7 +246,7 @@ new Chart(avgTimeOnMarketChart, {
         plugins: {
             title: {
                 display: true,
-                text: 'Number of SS vs Number of Trucks',
+                text: 'Lowest Avg Cost per Acre (Sold withing 90 days)',
                 font: {
                     size: 25
                 }
@@ -223,4 +254,78 @@ new Chart(avgTimeOnMarketChart, {
         }
     }
 });
-*/
+
+/**
+ *  Chart for highest median sale price
+ */
+let medSalePrice = [];
+Object.values(soldListings).forEach(listings => {
+    if (listings.length >= 3) {
+        let medianCost = listings[Math.round(listings.length / 2)].price;
+        medSalePrice.push({county: listings[0].county, medSalePrice: medianCost});
+    }
+})
+medSalePrice.sort((a, b) => a.medSalePrice <= b.medSalePrice ? 1 : -1)
+let medSalePrice15 = medSalePrice.slice(0, 15);
+const highestMedSalePriceChart = document.getElementById('highestMedSalePriceChart');
+new Chart(highestMedSalePriceChart, {
+    type: 'bar',
+    data: {
+        labels: medSalePrice15.map(row => row.county),
+        datasets: [{
+            label: 'Sold Price',
+            data: medSalePrice15.map(row => row.medSalePrice),
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Highest Median Sale Price (Sold withing 90 days)',
+                font: {
+                    size: 25
+                }
+            }
+        }
+    }
+});
+
+/**
+ *  Chart for highest median sale price
+ */
+
+medSalePrice15 = medSalePrice.reverse().slice(0, 15);
+const lowestMedSalePriceChart = document.getElementById('lowestMedSalePriceChart');
+new Chart(lowestMedSalePriceChart, {
+    type: 'bar',
+    data: {
+        labels: medSalePrice15.map(row => row.county),
+        datasets: [{
+            label: 'Sold Price',
+            data: medSalePrice15.map(row => row.medSalePrice),
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Lowest Median Sale Price (Sold withing 90 days)',
+                font: {
+                    size: 25
+                }
+            }
+        }
+    }
+});

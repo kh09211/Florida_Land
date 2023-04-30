@@ -11,58 +11,40 @@ use App\SQLiteCreateZillowTable;
 $pdo = (new SQLiteConnection())->connect();
 if ($pdo == null) { 
 	echo 'Whoops, could not connect to the SQLite database!'; die;
-} else {
-	// create table if it doesn't exist already
-	//(new SQLiteCreateZillowTable($pdo))->dropTables();
-	(new SQLiteCreateZillowTable($pdo))->createTables();
 }
 
 $zillow = new Zillow($pdo);
 $countiesArray = $zillow->getCounties();
-
+$zillow->getDatesAvailable();
 $projectPath = '/';//"/PHP_Projects/florida_land/";
 
-if (isset($_GET['run'])) {
+// Variables to pass to the view
+$adsCount = implode(' - ', array_map(function ($val) {
+	return ucfirst($val);
+}, $countiesArray));
 
-		// execute the scrape and store results
-		//$zillow->consumeLandDataSold();
-		//$zillow->insertSold();
-		$zillow->consumeLandDataForSale();
-		$zillow->insertForSale();
-		dump('Done!'); die;
-		//dump($zillow->getTotalsForSale());
-		dump($zillow->getSoldByCounty());
-		dump($zillow->getForSaleByCounty()); die;
-//dump($zillow->getResults()); die;
-	
+if (isset($_GET['daterange'])) {
+	// set dates to get from db
 } else {
-	// Variables to pass to the view
-	$adsCount = implode(' - ', array_map(function ($val) {
-		return ucfirst($val);
-	}, $countiesArray));
-
-	$soldTotals = $zillow->getTotalsSold();
-	$forSaleTotals = $zillow->getTotalsForSale();
-	$forSaleListings = $zillow->getForSaleByCounty();
-	$soldListings = $zillow->getSoldByCounty();
-	$totalListingsInDB = array_reduce([...$forSaleListings, ...$soldListings],fn($a, $v) => $a + count($v), 0);
-	
-	$soldTotalsJSON = json_encode($soldTotals);
-	$forSaleTotalsJSON = json_encode($forSaleTotals);
-	$soldListingsJSON = json_encode($soldListings);
-	$forSaleListingsJSON = json_encode($forSaleListings);
-
 	$dateTo = (new \DateTime)->setTimestamp($soldTotals[0]['insert_timestamp'])->format('m/d/Y');
 	$dateFrom = (new \DateTime)->setTimestamp($soldTotals[0]['insert_timestamp'] - 7776000)->format('m/d/Y');
-	//var_dump($soldTotals[0]); die;
-	echo "<script>
-			const soldTotals = {$soldTotalsJSON};
-			const forSaleTotals = {$forSaleTotalsJSON};
-			const soldListings = {$soldListingsJSON};
-			const forSaleListings = {$forSaleListingsJSON};
-		 </script>";
 }
 
+//$soldTotals = $zillow->getTotalsSold();
+//$forSaleTotals = $zillow->getTotalsForSale();
+$forSaleListings = $zillow->getForSaleByCounty();
+$soldListings = $zillow->getSoldByCounty();
+$totalListingsInDB = array_reduce([...$forSaleListings, ...$soldListings],fn($a, $v) => $a + count($v), 0);
+
+//soldTotalsJSON = json_encode($soldTotals);
+//$forSaleTotalsJSON = json_encode($forSaleTotals);
+$soldListingsJSON = json_encode($soldListings);
+$forSaleListingsJSON = json_encode($forSaleListings);
+
+echo "<script>
+		const soldListings = {$soldListingsJSON};
+		const forSaleListings = {$forSaleListingsJSON};
+		</script>";
 ?>
 
 <!DOCTYPE html>
@@ -113,15 +95,22 @@ if (isset($_GET['run'])) {
 						<canvas class="chart-bg" style="height: 2400px;" id="allForSaleChart"></canvas>
 					</div>
 				</div>
-				<!--
-				
-
 				<div class="row pb-4">
-					<div class="col-12">
-						<canvas class="chart-bg" id="avgTimeOnMarketChart"></canvas>
+					<div class="col-12 col-lg-6">
+						<canvas class="chart-bg" id="highestCostPerAcreChart"></canvas>
+					</div>
+					<div class="col-12 col-lg-6">
+						<canvas class="chart-bg" id="lowestCostPerAcreChart"></canvas>
 					</div>
 				</div>
-				-->
+				<div class="row pb-4">
+					<div class="col-12 col-lg-6">
+						<canvas class="chart-bg" id="highestMedSalePriceChart"></canvas>
+					</div>
+					<div class="col-12 col-lg-6">
+						<canvas class="chart-bg" id="lowestMedSalePriceChart"></canvas>
+					</div>
+				</div>
 			</div>
 		</div>
 
