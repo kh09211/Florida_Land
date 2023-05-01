@@ -28,7 +28,7 @@ $citiesArray = [
 	'tampa',
 	'treasure'
 ];
-$projectPath = '/';//"/PHP_Projects/florida_land/";
+$projectPath = "/florida_land/";
 
 if (isset($_GET['run'])) {
 

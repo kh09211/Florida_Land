@@ -35,7 +35,9 @@ class Zillow {
 	/**
      * consume the API and load land sold results
      */
-	public function consumeLandData($mode = 'sold') {
+	public function consumeLandData(string $mode = 'sold') {
+		if (!in_array($mode, ['sold', 'forsale'])) throw new Exception('The mode selection can only be "sold" or "forsale" strings.');
+
 		$browser = new HttpBrowser(HttpClient::create());
 		foreach ($this->countyData as $county => $data) {
 			$this->results[$county] = ['results' => [], 'total' => 0];
@@ -80,7 +82,6 @@ class Zillow {
 						];
 					}
 				}
-				
 			}
 		}
 	}
@@ -89,7 +90,7 @@ class Zillow {
      * insert sold results into the database
      */
 	public function insertListings($mode = 'sold') {
-		//$this->pdo->prepare("DELETE FROM zillow_sold")->execute();
+		if ($mode == 'forsale') $this->pdo->prepare("DELETE FROM zillow_forsale")->execute();
 		foreach ($this->results as $county => $countyResults) {
 			// get out list of zpids to check agains
 			$stmt = $this->pdo->query("SELECT zpid FROM zillow_" . $mode);
@@ -110,7 +111,7 @@ class Zillow {
 	/**
      * get the sold results from the database
      */
-    public function getSold(int $days = 30) {
+    public function getSold($days) {
 		$startUnix = time() - ($days * 86400);
 		$endUnix = time();
         $stmt = $this->pdo->query("SELECT *
@@ -123,7 +124,7 @@ class Zillow {
 	/**
      * get sold land rows ordered by county
      */
-    public function getSoldByCounty(int $days = 30) {
+    public function getSoldByCounty(int $days = 90) {
 		$counties = array_keys($this->countyData);
 		foreach ($counties as $county) {
 			$resultsByCounty[$county] = [];
@@ -135,7 +136,6 @@ class Zillow {
 		ksort($resultsByCounty);
 		return $resultsByCounty;
     }
-
 	
 	/**
      * get the forsale results from the database
@@ -162,5 +162,4 @@ class Zillow {
 		ksort($resultsByCounty);
 		return $resultsByCounty;
     }
-
 }

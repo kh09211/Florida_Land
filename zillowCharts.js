@@ -8,6 +8,7 @@ let counties = Object.keys(soldListings);
 
 // ordered by county
 let orderedSold = counties.map(county => ({'county': county, 'total': soldListings[county].length}))
+let orderedSold30d = counties.map(county => ({'county': county, 'total': soldListings30d[county].length}))
 let orderedForSale = counties.map(county => ({'county': county, 'total': forSaleListings[county].length}))
 
 // get a group of totals for out big all counties chart
@@ -21,6 +22,7 @@ orderedForSale.forEach(data => {
 
 // now order by greatest total to lowest
 orderedSold.sort((a,b) => a.total <= b.total ? 1 : -1);
+orderedSold30d.sort((a,b) => a.total <= b.total ? 1 : -1);
 orderedForSale.sort((a,b) => a.total <= b.total ? 1 : -1);
 
 /**
@@ -56,10 +58,10 @@ new Chart(allForSaleChart, {
                 ticks: {
                     autoSkip: false,
                 }
-            }/*,
+            },
             x: {
-                max: 2000
-            }*/
+                max: 550
+            }
         },
         plugins: {
             title: {
@@ -77,8 +79,8 @@ new Chart(allForSaleChart, {
  *  Chart (Pie) for counties with most sold land
  */
 const mostSoldChart = document.getElementById('mostSoldChart');
-let mostForSalePie = orderedSold.slice(0, 6);
-mostForSalePie.push({county: 'All other counties', total: orderedSold.slice(6).reduce((accumulator, currentValue) => accumulator + currentValue.total, 0)})
+let mostForSalePie = orderedSold30d.slice(0, 6);
+mostForSalePie.push({county: 'All other counties', total: orderedSold30d.slice(6).reduce((accumulator, currentValue) => accumulator + currentValue.total, 0)})
 new Chart(mostSoldChart, {
     type: 'pie',
     data: {
@@ -97,7 +99,7 @@ new Chart(mostSoldChart, {
             },
             title: {
                 display: true,
-                text: 'Lots Sold (90 days) Top Counties',
+                text: 'Lots Sold (30 days) Top Counties',
                 font: {
                     size: 25
                 }

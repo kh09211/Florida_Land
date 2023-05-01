@@ -16,29 +16,28 @@ if ($pdo == null) {
 $zillow = new Zillow($pdo);
 $countiesArray = $zillow->getCounties();
 $zillow->getDatesAvailable();
-$projectPath = '/';//"/PHP_Projects/florida_land/";
 
 // Variables to pass to the view
 $adsCount = implode(' - ', array_map(function ($val) {
 	return ucfirst($val);
 }, $countiesArray));
 
-if (isset($_GET['daterange'])) {
-	// set dates to get from db
-} else {
-	$dateTo = (new \DateTime)->setTimestamp($soldTotals[0]['insert_timestamp'])->format('m/d/Y');
-	$dateFrom = (new \DateTime)->setTimestamp($soldTotals[0]['insert_timestamp'] - 7776000)->format('m/d/Y');
-}
-
 $forSaleListings = $zillow->getForSaleByCounty();
-$soldListings = $zillow->getSoldByCounty();
+$soldListings = $zillow->getSoldByCounty(90);
+$soldListings30d = $zillow->getSoldByCounty(30);
 $totalListingsInDB = array_reduce([...$forSaleListings, ...$soldListings],fn($a, $v) => $a + count($v), 0);
 
 $soldListingsJSON = json_encode($soldListings);
+$soldListings30dJSON = json_encode($zillow->getSoldByCounty(30));
 $forSaleListingsJSON = json_encode($forSaleListings);
+
+$latestInsertDate = array_values($soldListings)[0][0]['insert_timestamp'];
+$dateTo = (new \DateTime)->setTimestamp($latestInsertDate)->format('m/d/Y');
+$dateFrom = (new \DateTime)->setTimestamp($latestInsertDate - 7776000)->format('m/d/Y');
 
 echo "<script>
 		const soldListings = {$soldListingsJSON};
+		const soldListings30d = {$soldListings30dJSON}
 		const forSaleListings = {$forSaleListingsJSON};
 	</script>";
 ?>
