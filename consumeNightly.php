@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use App\SQLiteConnection;
 use App\SQLiteCreateZillowTable;
 
+echo "Executing script...";
+
 $pdo = (new SQLiteConnection())->connect();
 if ($pdo == null) { 
 	echo 'Whoops, could not connect to the SQLite database!'; die;

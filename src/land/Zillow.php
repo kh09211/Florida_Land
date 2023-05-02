@@ -54,7 +54,7 @@ class Zillow {
 				',"regionSelection":' . $data['regionSelection'] . 
 				',"isMapVisible":true,"filterState":{"doz":{"value":"90"},"isCondo":{"value":false},"isPreMarketForeclosure":{"value":true},"isApartment":{"value":false},"isMultiFamily":{"value":false},"isAllHomes":{"value":true},"sortSelection":{"value":"days"},"isSingleFamily":{"value":false},"isTownhouse":{"value":false},"isMiddleSchool":{"value":false},"isHighSchool":{"value":false},"includeUnratedSchools":{"value":false},"isManufactured":{"value":false},"isComingSoon":{"value":false},"isPublicSchool":{"value":false},"isPrivateSchool":{"value":false},"isApartmentOrCondo":{"value":false},"isElementarySchool":{"value":false},"isCharterSchool":{"value":false}},"isListVisible":true}&wants={%22cat1%22:[%22listResults%22,%22mapResults%22]}&requestId=4';
 			}			
-			sleep(rand(5, 20) / 10); // pause between between 0.5 and 1 s to avoid running too fast
+			sleep(rand(5, 10) / 5); // pause between between 1 and 2 s to avoid running too fast
 			$browser->request('GET', $routeStr);
 			$response = $browser->getResponse();
 			$response = $response->toArray();
